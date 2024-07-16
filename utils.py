@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy.interpolate import CubicSpline, interp1d
 from video_test import extract_frames
+import open3d as o3d
 
 # ANSI escape codes for some colors
 class Colors:
@@ -83,7 +84,7 @@ def getIntensityIndex(y_values):
 
     # Find the index closest to the mean
     closest_index = np.argmin(np.round(np.abs(x_values - fitted_mean)))
-    print("Closest index to the mean:", closest_index)
+    # print("Closest index to the mean:", closest_index)
 
     # Plot the original data and the fitted Gaussian curve
     # plt.plot(x_values, y_values, 'b-', label='data')
@@ -349,19 +350,55 @@ def getReferenceLine(frame):
     return depth_map
 
 
-# frame = cv2.imread("./video_frames/grey_step_8.94mm/frame_00003.jpg", cv2.IMREAD_GRAYSCALE)
-# depth_data = getReferenceLine(frame)
+frame = cv2.imread("./video_frames/grey_step_8.94mm/frame_00003.jpg", cv2.IMREAD_GRAYSCALE)
+depth_data = getReferenceLine(frame)
 
-# # print(f"\n{Colors.OKGREEN}Pixel Line:{Colors.ENDC}")
-# # print(depth_data)
+# print(f"\n{Colors.OKGREEN}Pixel Line:{Colors.ENDC}")
+# print(depth_data)
 
-# depth_normalized = cv2.normalize(depth_data, None, 0, 255, cv2.NORM_MINMAX)
-# depth_normalized = depth_normalized.astype(np.uint8)
 
-# # Visualize the depth map
-# plt.imshow(depth_normalized, cmap='gray')
-# plt.title('Depth Map')
-# plt.colorbar()
-# plt.show()
+# Visualize the depth map
+plt.imshow(depth_data)
+plt.title('Depth Map')
+plt.colorbar()
+plt.show()
 
-getReferenceFrame()
+# getReferenceFrame()
+
+
+
+def getPointClouds(depthMap, cameraIntrinsic):
+    height, width = depthMap.shape
+    points = []
+
+    fx, fy = cameraIntrinsic[0, 0], cameraIntrinsic[1, 1]
+    cx, cy = cameraIntrinsic[0, 2], cameraIntrinsic[1, 2]
+
+    for v in range(height):
+        for u in range(width):
+            Z = depthMap[v, u]
+            if Z == 0:  # Skip invalid depth values
+                continue
+            X = (u - cx) * Z / fx
+            Y = (v - cy) * Z / fy
+            points.append([X, Y, Z])
+
+    points = np.array(points)
+
+    # Create point cloud
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(points)
+
+    return pcd
+
+def getIntrinsics(H, W, fov = 70.0):
+    # Calculate the focal length
+    f = W / (2 * np.tan(np.deg2rad(fov) / 2))
+    # Calculate the intrinsic matrix
+    K = np.array([[f, 0, W / 2], [0, f, H / 2], [0, 0, 1]])
+    return K
+cameraIntrinsic = getIntrinsics(480, 640)
+pcd = getPointClouds(depth_data, cameraIntrinsic)
+
+# Visualize point cloud
+o3d.visualization.draw_geometries([pcd])
