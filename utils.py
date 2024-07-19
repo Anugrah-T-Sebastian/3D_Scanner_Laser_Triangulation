@@ -384,7 +384,9 @@ def getPointClouds(depthMap, cameraIntrinsic):
             points.append([X, Y, Z])
 
     points = np.array(points)
-
+    print(f"{Colors.FAIL}Points:{Colors.ENDC}")
+    print(points)
+    
     # Create point cloud
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(points)
