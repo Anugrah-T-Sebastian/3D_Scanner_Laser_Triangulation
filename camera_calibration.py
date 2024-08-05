@@ -32,6 +32,7 @@ def getCameraCalibrationValues():
     images = glob.glob(folder + '/*.jpg')
     pixels_per_mm = []
 
+    count = 0
     for image in images:
         img = cv.imread(image)
         gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
@@ -49,6 +50,7 @@ def getCameraCalibrationValues():
         # Draw and display the corners
         cv.drawChessboardCorners(img, chessboardSize, corners2, ret)
         cv.imshow('img', img)
+        # cv.imwrite(folder + '/test' + str(count) + '.jpg', img)
         cv.waitKey(1000)
 
         # Calculate the average distance between adjacent corners in pixels
@@ -61,6 +63,7 @@ def getCameraCalibrationValues():
         
         # Calculate pixels per mm
         pixels_per_mm.append( avg_distance_in_pixels / size_of_chessboard_squares_mm)
+        count += 1
         
     else:
         print("Chessboard not found")
@@ -126,3 +129,4 @@ def getCameraCalibrationValues():
         mean_error += error
 
     print( "total error: {}".format(mean_error/len(objpoints)) )
+# getCameraCalibrationValues()

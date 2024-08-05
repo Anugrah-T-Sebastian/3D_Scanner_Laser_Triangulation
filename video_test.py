@@ -3,7 +3,7 @@ import os
 
 def extract_frames(video_name, extension = ".avi"):
     # Open the video file
-    cap = cv2.VideoCapture('./Video_sample/' + video_name + extension)
+    cap = cv2.VideoCapture('./Video_sample/Old_Samples/' + video_name + extension)
     # cap = cv2.VideoCapture('./reference.avi')
 
     # Check if the video opened successfully
@@ -23,7 +23,10 @@ def extract_frames(video_name, extension = ".avi"):
         ret, frame = cap.read()
         if not ret:
             break  # Break the loop if there are no more frames
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        # frame = cv2.cvtColor(frame, cv2.COLOR)
+        # frame = cv2.cvtColor
+
         frame_filename = os.path.join(output_folder, f"frame_{frame_count:05d}.jpg")
         cv2.imwrite(frame_filename, frame)
         frames.append(frame)
@@ -31,3 +34,5 @@ def extract_frames(video_name, extension = ".avi"):
     print(f"Extracted {frame_count} frames from the video.")
     return frames
 
+# extract_frames('reference_03','.mp4')
+# extract_frames('grey_cube_30mm')
